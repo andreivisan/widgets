@@ -1,6 +1,7 @@
 package com.miro.widgets.service;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.TreeMap;
@@ -57,9 +58,19 @@ public class WidgetDSServiceImpl implements WidgetCrudService {
     @Override
     public Widget save(Widget newWidget) {
         logger.info("Save widget using map storage");
+        
         newWidget.setWidgetId(counter.incrementAndGet());
+        if (newWidget.getzIndex() == null) {    
+            Integer maxZIntex = maxZIndex(repository);
+            newWidget.setzIndex(maxZIntex + 1);
+        }
         repository.put(newWidget.getzIndex(), newWidget);
+        
         return newWidget;
+    }
+
+    private Integer maxZIndex(TreeMap<Integer, Widget> input) {
+        return Collections.max(input.keySet());
     }
     
 }

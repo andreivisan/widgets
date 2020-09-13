@@ -1,5 +1,7 @@
 package com.miro.widgets.service;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -14,10 +16,13 @@ public class WidgetH2ServiceImpl implements WidgetCrudService {
 
     Logger logger = LoggerFactory.getLogger(WidgetH2ServiceImpl.class);
 
+    private List<Widget> allWidgets;
+
     private WidgetRepository repository;
 
     public WidgetH2ServiceImpl(WidgetRepository widgetRepository) {
         this.repository = widgetRepository;
+        this.allWidgets = new ArrayList<>();
     }
 
     @Override
@@ -29,7 +34,10 @@ public class WidgetH2ServiceImpl implements WidgetCrudService {
     @Override
     public List<Widget> findAllWidgets() {
         logger.info("Get all widgets from H2 storage");
-        return repository.findAll(Sort.by(Sort.Direction.ASC, "zIndex"));
+        
+        allWidgets = repository.findAll(Sort.by(Sort.Direction.ASC, "zIndex"));
+
+        return allWidgets;
     }
 
     @Override
@@ -41,7 +49,17 @@ public class WidgetH2ServiceImpl implements WidgetCrudService {
     @Override
     public Widget save(Widget newWidget) {
         logger.info("Save widget using H2 storage");
+
+        if (newWidget.getzIndex() == null) {
+            Integer maxZIndex = maxZIndex(allWidgets);
+            newWidget.setzIndex(maxZIndex + 1);
+        }
+
         return repository.save(newWidget);
+    }
+
+    private Integer maxZIndex(List<Widget> input) {
+        return Collections.max(input).getzIndex();
     }
     
 }
