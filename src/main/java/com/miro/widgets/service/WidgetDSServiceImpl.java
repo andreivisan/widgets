@@ -60,20 +60,27 @@ public class WidgetDSServiceImpl implements WidgetCrudService {
     public Widget save(Widget newWidget) {
         logger.info("Save widget using map storage");
         
-        //if(repo)
-        newWidget.setWidgetId(counter.incrementAndGet());
+        Optional<Widget> widgetToUpdate = findWidgetById(newWidget.getWidgetId());
         
+        if (widgetToUpdate.isEmpty()) {
+            newWidget.setWidgetId(counter.incrementAndGet());
+            if (newWidget.getzIndex() == null) {    
+                Integer maxZIntex = maxZIndex(repository);
+                newWidget.setzIndex(maxZIntex + 1);
+            }
+        }
+
+        if (widgetToUpdate.isPresent() && widgetToUpdate.get().getzIndex() == newWidget.getzIndex()) {
+            repository.put(newWidget.getzIndex(), newWidget);
+            return newWidget;
+        }
+
         repository = insertWidget(repository, newWidget);
         
         return newWidget;
     }
 
     private TreeMap<Integer, Widget> insertWidget(TreeMap<Integer, Widget> source, Widget newWidget) {
-        if (newWidget.getzIndex() == null) {    
-            Integer maxZIntex = maxZIndex(repository);
-            newWidget.setzIndex(maxZIntex + 1);
-        }
-
         if (source.containsKey(newWidget.getzIndex())) {
             TreeMap<Integer, Widget> result = new TreeMap<>();
 

@@ -49,16 +49,19 @@ public class WidgetH2ServiceImpl implements WidgetCrudService {
     private Widget insertWidget(Widget newWidget) {
         List<Widget> widgetList = findAllWidgets();
 
-        Widget widgetToUpdate = findWidgetById(widgetList, newWidget);
-
-        if (widgetToUpdate == null) {
+        if (newWidget.getWidgetId() == null) {
             if (newWidget.getzIndex() == null) {
                 Integer maxZIndex = maxZIndex(widgetList);
                 newWidget.setzIndex(maxZIndex + 1);
             }
         }
 
-        if (widgetToUpdate != null && widgetToUpdate.getzIndex() == newWidget.getzIndex()) {
+        Optional<Widget> widgetToUpdate = Optional.empty();
+        if(newWidget.getWidgetId() != null) {
+            widgetToUpdate = findWidgetById(newWidget.getWidgetId());
+        }
+        
+        if (widgetToUpdate.isPresent() && widgetToUpdate.get().getzIndex() == newWidget.getzIndex()) {
             return repository.save(newWidget);
         }
         
@@ -101,16 +104,6 @@ public class WidgetH2ServiceImpl implements WidgetCrudService {
             }
         }
 
-        return null;
-    }
-
-    private Widget findWidgetById(List<Widget> widgetList, Widget widget) {
-        for (Widget widgetItem : widgetList) {
-            if (widgetItem.getWidgetId() == widget.getWidgetId()) {
-                return widgetItem;
-            }
-        }
-        
         return null;
     }
     
