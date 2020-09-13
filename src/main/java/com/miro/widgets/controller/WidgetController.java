@@ -75,12 +75,28 @@ public class WidgetController {
         Widget updatedWidget = crudService.findWidgetById(id)
             .map(widget -> {
                 widget.setLastModificationDate(LocalDateTime.now());
-                widget.setWidgetHeight(newWidget.getWidgetHeight());
-                widget.setWidgetWidth(newWidget.getWidgetWidth());
-                widget.setxCoordinate(newWidget.getxCoordinate());
-                widget.setyCoordinate(newWidget.getyCoordinate());
-                widget.setzIndex(newWidget.getzIndex());
-                return repository.save(widget);
+
+                if (newWidget.getWidgetHeight() != null) {   
+                    widget.setWidgetHeight(newWidget.getWidgetHeight());
+                }
+
+                if (newWidget.getWidgetWidth() != null) {
+                    widget.setWidgetWidth(newWidget.getWidgetWidth());
+                }
+                
+                if(newWidget.getxCoordinate() != null) {
+                    widget.setxCoordinate(newWidget.getxCoordinate());
+                }
+                
+                if (newWidget.getyCoordinate() != null) {
+                    widget.setyCoordinate(newWidget.getyCoordinate());
+                }
+                
+                if (newWidget.getzIndex() != null) {
+                    widget.setzIndex(newWidget.getzIndex());
+                }
+                
+                return crudService.save(widget);
             }).orElseThrow(() -> new WidgetNotFoundException(id));
 
         EntityModel<Widget> widgetEntityModel = assembler.toModel(updatedWidget);

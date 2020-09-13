@@ -60,6 +60,7 @@ public class WidgetDSServiceImpl implements WidgetCrudService {
     public Widget save(Widget newWidget) {
         logger.info("Save widget using map storage");
         
+        //if(repo)
         newWidget.setWidgetId(counter.incrementAndGet());
         
         repository = insertWidget(repository, newWidget);
