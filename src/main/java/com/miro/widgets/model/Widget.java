@@ -1,6 +1,8 @@
 package com.miro.widgets.model;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -75,6 +77,26 @@ public class Widget implements Comparable<Widget> {
         this.widgetId = widgetId;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+
+        if (!(obj instanceof Widget)) {
+            return false;
+        }
+
+        Widget widget = (Widget) obj;
+
+        return Objects.equals(this.widgetId, widget.widgetId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.widgetId);
+    }
+    
     @Override
     public int compareTo(Widget otherWidget) {
         if (this.getzIndex() > otherWidget.getzIndex()) {

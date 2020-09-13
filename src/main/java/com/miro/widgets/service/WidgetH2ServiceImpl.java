@@ -16,13 +16,10 @@ public class WidgetH2ServiceImpl implements WidgetCrudService {
 
     Logger logger = LoggerFactory.getLogger(WidgetH2ServiceImpl.class);
 
-    private List<Widget> allWidgets;
-
     private WidgetRepository repository;
 
     public WidgetH2ServiceImpl(WidgetRepository widgetRepository) {
         this.repository = widgetRepository;
-        this.allWidgets = new ArrayList<>();
     }
 
     @Override
@@ -34,10 +31,8 @@ public class WidgetH2ServiceImpl implements WidgetCrudService {
     @Override
     public List<Widget> findAllWidgets() {
         logger.info("Get all widgets from H2 storage");
-        
-        allWidgets = repository.findAll(Sort.by(Sort.Direction.ASC, "zIndex"));
 
-        return allWidgets;
+        return repository.findAll(Sort.by(Sort.Direction.ASC, "zIndex"));
     }
 
     @Override
@@ -49,10 +44,26 @@ public class WidgetH2ServiceImpl implements WidgetCrudService {
     @Override
     public Widget save(Widget newWidget) {
         logger.info("Save widget using H2 storage");
+        return insertWidget(newWidget);
+    }
 
+    private Widget insertWidget(Widget newWidget) {
+        List<Widget> widgetList = findAllWidgets();
+        
         if (newWidget.getzIndex() == null) {
-            Integer maxZIndex = maxZIndex(allWidgets);
+            Integer maxZIndex = maxZIndex(widgetList);
             newWidget.setzIndex(maxZIndex + 1);
+        }
+
+        Widget fromWidget = findWidget(widgetList, newWidget);
+        if (fromWidget != null) {
+            logger.info("The new widget has same zIndex as an existing widget");
+            
+            List<Widget> tail = widgetList.subList(widgetList.indexOf(fromWidget), widgetList.size());
+            for (Widget widget : tail) {
+                widget.setzIndex(widget.getzIndex() + 1);
+            }
+            repository.saveAll(tail);
         }
 
         return repository.save(newWidget);
@@ -60,6 +71,25 @@ public class WidgetH2ServiceImpl implements WidgetCrudService {
 
     private Integer maxZIndex(List<Widget> input) {
         return Collections.max(input).getzIndex();
+    }
+
+    private Widget findWidget(List<Widget> widgetList, Widget widget) {
+        int left = 0;
+        int right = widgetList.size() - 1;
+
+        while(left <= right) {
+            int mid = left + ((right - left) / 2);
+
+            if(widget.getzIndex() == widgetList.get(mid).getzIndex()) {
+                return widgetList.get(mid);
+            } else if(widget.getzIndex() < widgetList.get(mid).getzIndex()) {
+                right = mid - 1;
+            } else {
+                left = mid + 1;
+            }
+        }
+
+        return null;
     }
     
 }
