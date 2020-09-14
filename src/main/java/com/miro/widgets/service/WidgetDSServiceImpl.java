@@ -15,6 +15,8 @@ import org.slf4j.LoggerFactory;
 
 public class WidgetDSServiceImpl implements WidgetCrudService {
 
+    private final static int Z_INDEX_SHIT = 1;
+
     Logger logger = LoggerFactory.getLogger(WidgetDSServiceImpl.class);
 
     private TreeMap<Integer, Widget> repository;
@@ -66,7 +68,7 @@ public class WidgetDSServiceImpl implements WidgetCrudService {
             newWidget.setWidgetId(counter.incrementAndGet());
             if (newWidget.getzIndex() == null) {    
                 Integer maxZIntex = maxZIndex(repository);
-                newWidget.setzIndex(maxZIntex + 1);
+                newWidget.setzIndex(maxZIntex + Z_INDEX_SHIT);
             }
         }
 
@@ -101,7 +103,7 @@ public class WidgetDSServiceImpl implements WidgetCrudService {
     }
 
     private Widget incrementZIndex(Widget widget) {
-        widget.setzIndex(widget.getzIndex() + 1);
+        widget.setzIndex(widget.getzIndex() + Z_INDEX_SHIT);
         return widget;
     }
 

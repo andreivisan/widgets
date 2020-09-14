@@ -13,6 +13,8 @@ import org.springframework.data.domain.Sort;
 
 public class WidgetH2ServiceImpl implements WidgetCrudService {
 
+    private final static int Z_INDEX_SHIT = 1;
+
     Logger logger = LoggerFactory.getLogger(WidgetH2ServiceImpl.class);
 
     private WidgetRepository repository;
@@ -52,7 +54,7 @@ public class WidgetH2ServiceImpl implements WidgetCrudService {
         if (newWidget.getWidgetId() == null) {
             if (newWidget.getzIndex() == null) {
                 Integer maxZIndex = maxZIndex(widgetList);
-                newWidget.setzIndex(maxZIndex + 1);
+                newWidget.setzIndex(maxZIndex + Z_INDEX_SHIT);
             }
         }
 
@@ -71,12 +73,12 @@ public class WidgetH2ServiceImpl implements WidgetCrudService {
     }
 
     private void incrementZIndex(List<Widget> widgetList, Widget newWidget) {
-        Widget fromWidget = findWidgetByZIndex(widgetList, newWidget);
+        Optional<Widget> fromWidget = findWidgetByZIndex(widgetList, newWidget);
         
-        if (fromWidget != null) {
+        if (!fromWidget.isEmpty()) {
             logger.info("The new widget has same zIndex as an existing widget");
             
-            List<Widget> tail = widgetList.subList(widgetList.indexOf(fromWidget), widgetList.size());
+            List<Widget> tail = widgetList.subList(widgetList.indexOf(fromWidget.get()), widgetList.size());
             for (Widget widget : tail) {
                 widget.setzIndex(widget.getzIndex() + 1);
             }
@@ -88,7 +90,7 @@ public class WidgetH2ServiceImpl implements WidgetCrudService {
         return Collections.max(input).getzIndex();
     }
 
-    private Widget findWidgetByZIndex(List<Widget> widgetList, Widget widget) {
+    private Optional<Widget> findWidgetByZIndex(List<Widget> widgetList, Widget widget) {
         int left = 0;
         int right = widgetList.size() - 1;
 
@@ -96,7 +98,7 @@ public class WidgetH2ServiceImpl implements WidgetCrudService {
             int mid = left + ((right - left) / 2);
 
             if(widget.getzIndex() == widgetList.get(mid).getzIndex()) {
-                return widgetList.get(mid);
+                return Optional.of(widgetList.get(mid));
             } else if(widget.getzIndex() < widgetList.get(mid).getzIndex()) {
                 right = mid - 1;
             } else {
@@ -104,7 +106,7 @@ public class WidgetH2ServiceImpl implements WidgetCrudService {
             }
         }
 
-        return null;
+        return Optional.empty();
     }
     
 }
