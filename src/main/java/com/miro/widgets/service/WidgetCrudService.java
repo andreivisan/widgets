@@ -34,6 +34,10 @@ public interface WidgetCrudService {
     }
 
     default boolean validateInputs(Widget widget) {
+        if (Objects.isNull(widget)) {
+            return false;
+        }
+
         if (Objects.isNull(widget.getxCoordinate()) || Objects.isNull(widget.getyCoordinate())) {
             return false;
         }
