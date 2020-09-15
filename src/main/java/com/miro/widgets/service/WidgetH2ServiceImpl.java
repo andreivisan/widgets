@@ -1,9 +1,9 @@
 package com.miro.widgets.service;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import com.miro.widgets.exception.WidgetNotFoundException;
 import com.miro.widgets.model.Widget;
 import com.miro.widgets.repository.WidgetRepository;
 
@@ -43,36 +43,39 @@ public class WidgetH2ServiceImpl implements WidgetCrudService {
     }
 
     @Override
-    public Widget save(Widget newWidget) {
-        logger.info("Save widget using H2 storage");
+    public Widget create(Widget newWidget) {
+        logger.info("Create widget using H2 storage");
+
+        if (newWidget.getzIndex() == null) {
+            Integer maxZIndex = maxZIndex();
+            newWidget.setzIndex(maxZIndex + Z_INDEX_SHIT);
+        }
+
         return insertWidget(newWidget);
     }
 
+    @Override
+    public Widget update(Widget newWidget, Long id) {
+        logger.info("Update widget using H2 storage");
+
+        Widget oldWidget = findWidgetById(id).orElseThrow(() -> new WidgetNotFoundException(id));
+        Widget mergedWidget = merge(oldWidget, newWidget);
+
+        if (oldWidget.getzIndex() == mergedWidget.getzIndex()) {
+            return repository.save(mergedWidget);
+        }
+
+        return insertWidget(mergedWidget);
+    }
+
     private Widget insertWidget(Widget newWidget) {
-        List<Widget> widgetList = findAllWidgets();
-
-        if (newWidget.getWidgetId() == null) {
-            if (newWidget.getzIndex() == null) {
-                Integer maxZIndex = maxZIndex(widgetList);
-                newWidget.setzIndex(maxZIndex + Z_INDEX_SHIT);
-            }
-        }
-
-        Optional<Widget> widgetToUpdate = Optional.empty();
-        if(newWidget.getWidgetId() != null) {
-            widgetToUpdate = findWidgetById(newWidget.getWidgetId());
-        }
-        
-        if (widgetToUpdate.isPresent() && widgetToUpdate.get().getzIndex() == newWidget.getzIndex()) {
-            return repository.save(newWidget);
-        }
-        
-        incrementZIndex(widgetList, newWidget);
+        incrementZIndex(newWidget);
 
         return repository.save(newWidget);
     }
 
-    private void incrementZIndex(List<Widget> widgetList, Widget newWidget) {
+    private void incrementZIndex(Widget newWidget) {
+        List<Widget> widgetList = findAllWidgets();
         Optional<Widget> fromWidget = findWidgetByZIndex(widgetList, newWidget);
         
         if (!fromWidget.isEmpty()) {
@@ -86,15 +89,19 @@ public class WidgetH2ServiceImpl implements WidgetCrudService {
         }
     }
 
-    private Integer maxZIndex(List<Widget> input) {
-        return Collections.max(input).getzIndex();
+    private Integer maxZIndex() {
+        List<Widget> widgetList = findAllWidgets();
+        if (widgetList.isEmpty()) {
+            return 0;
+        }
+        return widgetList.get(widgetList.size() - 1).getzIndex();
     }
 
     private Optional<Widget> findWidgetByZIndex(List<Widget> widgetList, Widget widget) {
         int left = 0;
         int right = widgetList.size() - 1;
 
-        while(left <= right) {
+        while (left <= right) {
             int mid = left + ((right - left) / 2);
 
             if(widget.getzIndex() == widgetList.get(mid).getzIndex()) {

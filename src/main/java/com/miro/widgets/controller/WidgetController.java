@@ -3,7 +3,6 @@ package com.miro.widgets.controller;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
@@ -40,13 +39,13 @@ public class WidgetController {
     WidgetController(@Value("${storage.h2}") String useH2Storage, WidgetRepository repository, WidgetModelAssembler assembler) {
         this.repository = repository;
         this.assembler = assembler;
-        crudService = Boolean.valueOf(useH2Storage) ? new WidgetH2ServiceImpl(repository) : new WidgetDSServiceImpl(new TreeMap<>());
+        crudService = Boolean.valueOf(useH2Storage) ? new WidgetH2ServiceImpl(this.repository) : new WidgetDSServiceImpl(new TreeMap<>());
         
     }
 
     @PostMapping("/widgets")
     public ResponseEntity<?> newWidget(@RequestBody Widget newWidget) {
-        EntityModel<Widget> widgetEntityModel = assembler.toModel(crudService.save(newWidget));
+        EntityModel<Widget> widgetEntityModel = assembler.toModel(crudService.create(newWidget));
 
         return ResponseEntity
             .created(widgetEntityModel.getRequiredLink(IanaLinkRelations.SELF).toUri())
@@ -72,32 +71,7 @@ public class WidgetController {
 
     @PutMapping("/widgets/{id}")
     public ResponseEntity<?> updateWidget(@RequestBody Widget newWidget, @PathVariable Long id) {
-        Widget updatedWidget = crudService.findWidgetById(id)
-            .map(widget -> {
-                widget.setLastModificationDate(LocalDateTime.now());
-
-                if (newWidget.getWidgetHeight() != null) {   
-                    widget.setWidgetHeight(newWidget.getWidgetHeight());
-                }
-
-                if (newWidget.getWidgetWidth() != null) {
-                    widget.setWidgetWidth(newWidget.getWidgetWidth());
-                }
-                
-                if(newWidget.getxCoordinate() != null) {
-                    widget.setxCoordinate(newWidget.getxCoordinate());
-                }
-                
-                if (newWidget.getyCoordinate() != null) {
-                    widget.setyCoordinate(newWidget.getyCoordinate());
-                }
-                
-                if (newWidget.getzIndex() != null) {
-                    widget.setzIndex(newWidget.getzIndex());
-                }
-                
-                return crudService.save(widget);
-            }).orElseThrow(() -> new WidgetNotFoundException(id));
+        Widget updatedWidget = crudService.update(newWidget, id);
 
         EntityModel<Widget> widgetEntityModel = assembler.toModel(updatedWidget);
 
