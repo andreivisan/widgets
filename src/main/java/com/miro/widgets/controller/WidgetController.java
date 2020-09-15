@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
+import com.miro.widgets.exception.InvalidInputException;
 import com.miro.widgets.exception.WidgetNotFoundException;
 import com.miro.widgets.model.Widget;
 import com.miro.widgets.model.WidgetModelAssembler;
@@ -45,7 +46,8 @@ public class WidgetController {
 
     @PostMapping("/widgets")
     public ResponseEntity<?> newWidget(@RequestBody Widget newWidget) {
-        EntityModel<Widget> widgetEntityModel = assembler.toModel(crudService.create(newWidget));
+        Widget widget = crudService.create(newWidget).orElseThrow(() -> new InvalidInputException("Inputs are not valid"));
+        EntityModel<Widget> widgetEntityModel = assembler.toModel(widget);
 
         return ResponseEntity
             .created(widgetEntityModel.getRequiredLink(IanaLinkRelations.SELF).toUri())
@@ -71,7 +73,7 @@ public class WidgetController {
 
     @PutMapping("/widgets/{id}")
     public ResponseEntity<?> updateWidget(@RequestBody Widget newWidget, @PathVariable Long id) {
-        Widget updatedWidget = crudService.update(newWidget, id);
+        Widget updatedWidget = crudService.update(newWidget, id).orElseThrow(() -> new InvalidInputException("Inputs are not valid"));
 
         EntityModel<Widget> widgetEntityModel = assembler.toModel(updatedWidget);
 

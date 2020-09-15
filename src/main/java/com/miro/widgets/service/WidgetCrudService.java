@@ -2,19 +2,20 @@ package com.miro.widgets.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import com.miro.widgets.model.Widget;
 
 public interface WidgetCrudService {
 
-    Widget create(Widget newWidget);
+    Optional<Widget> create(Widget newWidget);
 
     Optional<Widget> findWidgetById(Long id);
 
     List<Widget> findAllWidgets();
 
-    Widget update(Widget newWidget, Long id);
+    Optional<Widget> update(Widget newWidget, Long id);
 
     void deleteWidgetById(Long id);
 
@@ -30,6 +31,18 @@ public interface WidgetCrudService {
         merged.setzIndex(Optional.ofNullable(newWidget.getzIndex()).orElse(oldWidget.getzIndex()));
 
         return merged;
+    }
+
+    default boolean validateInputs(Widget widget) {
+        if (Objects.isNull(widget.getxCoordinate()) || Objects.isNull(widget.getyCoordinate())) {
+            return false;
+        }
+
+        if(Objects.isNull(widget.getWidgetHeight()) || Objects.isNull(widget.getWidgetWidth()) || widget.getWidgetHeight() < 0 || widget.getWidgetWidth() < 0) {
+            return false;
+        }
+
+        return true;
     }
     
 }

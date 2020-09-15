@@ -43,29 +43,38 @@ public class WidgetH2ServiceImpl implements WidgetCrudService {
     }
 
     @Override
-    public Widget create(Widget newWidget) {
+    public Optional<Widget> create(Widget newWidget) {
         logger.info("Create widget using H2 storage");
 
-        if (newWidget.getzIndex() == null) {
-            Integer maxZIndex = maxZIndex();
-            newWidget.setzIndex(maxZIndex + Z_INDEX_SHIT);
-        }
-
-        return insertWidget(newWidget);
+        if (validateInputs(newWidget)) {
+            if (newWidget.getzIndex() == null) {
+                Integer maxZIndex = maxZIndex();
+                newWidget.setzIndex(maxZIndex + Z_INDEX_SHIT);
+            }
+    
+            return Optional.of(insertWidget(newWidget));
+        } else {
+            return Optional.empty();
+        } 
     }
 
     @Override
-    public Widget update(Widget newWidget, Long id) {
+    public Optional<Widget> update(Widget newWidget, Long id) {
         logger.info("Update widget using H2 storage");
 
         Widget oldWidget = findWidgetById(id).orElseThrow(() -> new WidgetNotFoundException(id));
         Widget mergedWidget = merge(oldWidget, newWidget);
 
-        if (oldWidget.getzIndex() == mergedWidget.getzIndex()) {
-            return repository.save(mergedWidget);
-        }
+        if (validateInputs(mergedWidget)) {
+            if (oldWidget.getzIndex() == mergedWidget.getzIndex()) {
+                return Optional.of(repository.save(mergedWidget));
+            }
 
-        return insertWidget(mergedWidget);
+            return Optional.of(insertWidget(mergedWidget));
+        } else {
+            return Optional.empty();
+        }
+        
     }
 
     private Widget insertWidget(Widget newWidget) {

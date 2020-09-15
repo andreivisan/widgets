@@ -72,7 +72,7 @@ public class WidgetDSServiceImpl implements WidgetCrudService {
         logger.info("Find widget by id from map storage");
 
         readLock.lock();
-        try {   
+        try {
             for (Widget widget : repository.values()) {
                 if (widget.getWidgetId() == id) {
                     return Optional.of(widget);
@@ -86,46 +86,57 @@ public class WidgetDSServiceImpl implements WidgetCrudService {
     }
 
     @Override
-    public Widget create(Widget newWidget) {
+    public Optional<Widget> create(Widget newWidget) {
         logger.info("Create widget using map storage");
 
-        newWidget.setWidgetId(counter.incrementAndGet());
-        
-        if (newWidget.getzIndex() == null) {    
-            Integer maxZIntex = maxZIndex(repository);
-            newWidget.setzIndex(maxZIntex + Z_INDEX_SHIT);
-        }
-
         writeLock.lock();
         try {
-            insertWidget(newWidget);
-        } finally {
-            writeLock.unlock();
-        }
+            if(validateInputs(newWidget)) {
+                newWidget.setWidgetId(counter.incrementAndGet());
 
-        return newWidget;
-    }
+                if (newWidget.getzIndex() == null) {
+                    Integer maxZIntex = maxZIndex(repository);
+                    newWidget.setzIndex(maxZIntex + Z_INDEX_SHIT);
+                }
 
-    @Override
-    public Widget update(Widget newWidget, Long id) {
-        logger.info("Update widget using map storage");
+                insertWidget(newWidget);
 
-        Widget oldWidget = findWidgetById(id).orElseThrow(() -> new WidgetNotFoundException(id));
-        Widget mergedWidget = merge(oldWidget, newWidget);
-
-        writeLock.lock();
-        try {
-            if (oldWidget.getzIndex() == mergedWidget.getzIndex()) {
-                repository.replace(oldWidget.getzIndex(), mergedWidget);
+                return Optional.of(newWidget);
             } else {
-                repository.remove(oldWidget.getzIndex());
-                insertWidget(mergedWidget);
+                logger.error("Invalid inputs");
+                return Optional.empty();
             }
         } finally {
             writeLock.unlock();
         }
+    }
 
-        return mergedWidget;
+    @Override
+    public Optional<Widget> update(Widget newWidget, Long id) {
+        logger.info("Update widget using map storage");
+
+        Widget oldWidget = findWidgetById(id).orElseThrow(() -> new WidgetNotFoundException(id));
+            
+        writeLock.lock();
+        try {
+            Widget mergedWidget = merge(oldWidget, newWidget);
+            
+            if (validateInputs(mergedWidget)) {
+                if (oldWidget.getzIndex() == mergedWidget.getzIndex()) {
+                    repository.replace(oldWidget.getzIndex(), mergedWidget);
+                } else {
+                    repository.remove(oldWidget.getzIndex());
+                    insertWidget(mergedWidget);
+                }
+
+                return Optional.of(mergedWidget);
+            } else {
+                logger.error("Invalid inputs");
+                return Optional.empty();
+            }
+        } finally {
+            writeLock.unlock();
+        }
     }
 
     private void insertWidget(Widget newWidget) {
