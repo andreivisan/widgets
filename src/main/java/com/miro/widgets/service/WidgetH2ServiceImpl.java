@@ -9,8 +9,10 @@ import com.miro.widgets.repository.WidgetRepository;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Sort;
 
+@Qualifier("H2Service")
 public class WidgetH2ServiceImpl implements WidgetCrudService {
 
     private final static int Z_INDEX_SHIT = 1;

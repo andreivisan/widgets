@@ -13,7 +13,7 @@ public class InvalidInputAdvice {
 
     @ResponseBody
     @ExceptionHandler(InvalidInputException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     String widgetNotFoundHandler(InvalidInputException ex) {
         return ex.getMessage();
     }

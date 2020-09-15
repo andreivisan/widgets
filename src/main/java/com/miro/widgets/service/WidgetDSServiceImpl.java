@@ -13,7 +13,9 @@ import com.miro.widgets.model.Widget;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 
+@Qualifier("DataStructureService")
 public class WidgetDSServiceImpl implements WidgetCrudService {
 
     private final static int Z_INDEX_SHIT = 1;
@@ -120,7 +122,7 @@ public class WidgetDSServiceImpl implements WidgetCrudService {
         writeLock.lock();
         try {
             Widget mergedWidget = merge(oldWidget, newWidget);
-            
+
             if (validateInputs(mergedWidget)) {
                 if (oldWidget.getzIndex() == mergedWidget.getzIndex()) {
                     repository.replace(oldWidget.getzIndex(), mergedWidget);
