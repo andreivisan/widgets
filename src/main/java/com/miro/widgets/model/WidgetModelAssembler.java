@@ -3,6 +3,8 @@ package com.miro.widgets.model;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
+import java.util.Optional;
+
 import com.miro.widgets.controller.WidgetController;
 
 import org.springframework.hateoas.EntityModel;
@@ -17,7 +19,7 @@ public class WidgetModelAssembler implements RepresentationModelAssembler<Widget
     public EntityModel<Widget> toModel(Widget widget) {
         return EntityModel.of(widget, 
             linkTo(methodOn(WidgetController.class).singleWidget(widget.getWidgetId())).withSelfRel(),
-            linkTo(methodOn(WidgetController.class).allWidgets()).withRel("widgets"));
+            linkTo(methodOn(WidgetController.class).allWidgets(Optional.empty(), Optional.empty())).withRel("widgets"));
     }
     
 }

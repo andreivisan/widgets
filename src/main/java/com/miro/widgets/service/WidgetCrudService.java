@@ -13,7 +13,7 @@ public interface WidgetCrudService {
 
     Optional<Widget> findWidgetById(Long id);
 
-    List<Widget> findAllWidgets();
+    List<Widget> findAllWidgets(int page, int perPage);
 
     Optional<Widget> update(Widget newWidget, Long id);
 

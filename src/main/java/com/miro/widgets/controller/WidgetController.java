@@ -4,6 +4,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
@@ -27,6 +28,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -36,6 +38,13 @@ public class WidgetController {
     private final WidgetModelAssembler assembler;
 
     private WidgetCrudService crudService;
+    
+    @Value("${perPage.default}")
+    private int perPageDefault;
+
+    @Value("${perPage.max}")
+    private int perPageMax;
+
 
     WidgetController(@Value("${storage.h2}") String useH2Storage, WidgetRepository repository, WidgetModelAssembler assembler) {
         this.repository = repository;
@@ -62,13 +71,16 @@ public class WidgetController {
     }
 
     @GetMapping("/widgets")
-    public CollectionModel<EntityModel<Widget>> allWidgets() {
-        List<EntityModel<Widget>> widgets = crudService.findAllWidgets().stream()
+    public CollectionModel<EntityModel<Widget>> allWidgets(@RequestParam(value = "page") Optional<Integer> pageOpt, @RequestParam(value = "perPage") Optional<Integer> perPageOpt) {
+        var page = Math.max(1, pageOpt.orElse(1));
+        var perPage = Math.min(perPageOpt.orElse(perPageDefault), perPageMax);
+        
+        List<EntityModel<Widget>> widgets = crudService.findAllWidgets(page, perPage).stream()
             .map(assembler::toModel)
             .collect(Collectors.toList());
 
         return CollectionModel.of(widgets,
-            linkTo(methodOn(WidgetController.class).allWidgets()).withSelfRel());
+            linkTo(methodOn(WidgetController.class).allWidgets(pageOpt, pageOpt)).withSelfRel());
     }
 
     @PutMapping("/widgets/{id}")

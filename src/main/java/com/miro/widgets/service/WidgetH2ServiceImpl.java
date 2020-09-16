@@ -1,7 +1,9 @@
 package com.miro.widgets.service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import com.miro.widgets.exception.WidgetNotFoundException;
 import com.miro.widgets.model.Widget;
@@ -32,10 +34,16 @@ public class WidgetH2ServiceImpl implements WidgetCrudService {
     }
 
     @Override
-    public List<Widget> findAllWidgets() {
+    public List<Widget> findAllWidgets(int page, int perPage) {
         logger.info("Get all widgets from H2 storage");
+        List<Widget> widgetList = findAllWidgets();
 
-        return repository.findAll(Sort.by(Sort.Direction.ASC, "zIndex"));
+        var startIndex = (page - 1) * perPage;
+        if (startIndex >= widgetList.size()) {
+            return Collections.EMPTY_LIST;
+        }
+
+        return widgetList.stream().skip(startIndex).limit(perPage).collect(Collectors.toList());
     }
 
     @Override
@@ -125,6 +133,10 @@ public class WidgetH2ServiceImpl implements WidgetCrudService {
         }
 
         return Optional.empty();
+    }
+
+    private List<Widget> findAllWidgets() {
+        return repository.findAll(Sort.by(Sort.Direction.ASC, "zIndex"));
     }
     
 }

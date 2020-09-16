@@ -1,5 +1,7 @@
-{"properties": [{
-  "name": "storage.h2",
-  "type": "java.lang.String",
-  "description": "A description for 'storage.h2'"
-}]}
+{"properties": [
+  {
+    "name": "storage.h2",
+    "type": "java.lang.String",
+    "description": "A description for 'storage.h2'"
+  }
+]}

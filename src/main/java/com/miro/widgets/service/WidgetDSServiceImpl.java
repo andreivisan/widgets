@@ -1,12 +1,14 @@
 package com.miro.widgets.service;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.stream.Collectors;
 
 import com.miro.widgets.exception.WidgetNotFoundException;
 import com.miro.widgets.model.Widget;
@@ -55,9 +57,14 @@ public class WidgetDSServiceImpl implements WidgetCrudService {
     }
 
     @Override
-    public List<Widget> findAllWidgets() {
+    public List<Widget> findAllWidgets(int page, int perPage) {
         logger.info("Find all widgets from map storage");
         List<Widget> widgets = new ArrayList<>();
+
+        var startIndex = (page - 1) * perPage;
+        if (startIndex >= repository.size()) {
+            return Collections.EMPTY_LIST;
+        }
 
         readLock.lock();
         try {
@@ -66,7 +73,7 @@ public class WidgetDSServiceImpl implements WidgetCrudService {
             readLock.unlock();
         }
 
-        return widgets;
+        return widgets.stream().skip(startIndex).limit(perPage).collect(Collectors.toList());
     }
 
     @Override
