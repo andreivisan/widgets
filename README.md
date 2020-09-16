@@ -51,4 +51,7 @@ DELETE Request ```http://localhost:8080/widgets/{id}```
 1. Pagination
 4. SQL Database - for this I chose H2 in memory database. The configuration to switch between in memory storage using a TreeMap or H2 database is done by setting ```storage.h2```inside ```application.properties``` to ```true``` for using H2 DB or ```false``` for using TreeMap in memory storage.
   To access the H2 console use ```http://localhost:8080/h2-console``` username ```sa``` and no password. Data source URL is ```jdbc:h2:mem:widget```.
+  
+## Note:
+For filtering challenge, I considered using Two Dimensional Binary Indexed Tree or Fenwick Tree as data structure in order to obtain a better time complexity than O(n). Given that this is a new data structure for me I didn't have enough time to implement a solution however I greatly enjoyed getting familiar with it. 
 
