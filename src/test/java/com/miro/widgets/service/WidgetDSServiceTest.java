@@ -44,7 +44,7 @@ public class WidgetDSServiceTest {
     }
 
     @Test
-    void whenSavindWidgetWithExistingZIndex_thenMoveEqualOrGreaterInFront() {
+    void whenSavingWidgetWithExistingZIndex_thenMoveEqualOrGreaterInFront() {
         Widget widgetWithZIndex = service.create(TestUtil.createWidgetWithZIndex().get()).get();
 
         assertEquals(7, widgetWithZIndex.getzIndex());

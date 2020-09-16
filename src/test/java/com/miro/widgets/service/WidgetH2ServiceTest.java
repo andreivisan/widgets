@@ -1,29 +1,23 @@
 package com.miro.widgets.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Optional;
 
-import com.miro.widgets.exception.WidgetNotFoundException;
-import com.miro.widgets.model.Widget;
 import com.miro.widgets.repository.WidgetRepository;
 import com.miro.widgets.util.TestUtil;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.dao.EmptyResultDataAccessException;
 
-@ExtendWith(SpringExtension.class)
+@DataJpaTest
 public class WidgetH2ServiceTest {
 
-    @Mock
+    @Autowired
     private WidgetRepository repository;
 
     private WidgetCrudService service;
@@ -31,11 +25,33 @@ public class WidgetH2ServiceTest {
     @BeforeEach
     void setup() {
         service = new WidgetH2ServiceImpl(repository);
+
+        service.create(TestUtil.createWidgetWithZIndex().get());
     }
 
     @Test
     void whenSavingNullWidget_thenReturnOptionalEmpty() {
         assertEquals(Optional.empty(), service.create(null));
+    }
+
+    @Test
+    void whenSavingValidWidget_thenWidgetIsInH2DB() {
+        assertEquals(1, service.findAllWidgets().size());
+    }
+
+    @Test
+    void whenFindingWidgetWithInvalidId_thenReturnOptionalEmpty() {
+        assertEquals(Optional.empty(), service.findWidgetById(100L));
+    }
+
+    @Test
+    void whenFindingWidgetWithValidId_thenReturnWidget() {
+        assertEquals(7, service.findWidgetById(1L).get().getzIndex());
+    }
+
+    @Test
+    void whenDeletingWidgetWithInvalidId_thenExceptionIsThrows() throws Exception {
+        assertThrows(EmptyResultDataAccessException.class, () -> service.deleteWidgetById(100L));
     }
     
 }
