@@ -61,14 +61,18 @@ public class WidgetDSServiceTest {
         assertEquals(7, service.findWidgetById(0L).get().getzIndex());
     }
 
-    // @Test
-    // void whenFindAllWidgets_returnInAscendingOrderByZIndex() {
-    //     Widget mockWidget = TestUtil.createWidgetWithNoZIndex().get();
-    //     service.create(mockWidget);
+    @Test
+    void whenFindAllWidgets_returnInAscendingOrderByZIndex() {
+        Widget mockWidget = TestUtil.createWidgetWithNoZIndex().get();
+
+        //Add 15 widgets for testing pagination
+        for(int i = 0; i < 15; i++) {
+            service.create(mockWidget);
+        }
             
-    //     assertEquals(2, service.findAllWidgets().size());
-    //     assertTrue(service.findAllWidgets().get(0).getzIndex() < service.findAllWidgets().get(1).getzIndex());
-    // }
+        assertEquals(7, service.findAllWidgets(1, 7).size());
+        assertTrue(service.findAllWidgets(1, 7).get(0).getzIndex() < service.findAllWidgets(1, 7).get(1).getzIndex());
+    }
 
     @Test
     void whenUpdateWidgetWithValidInput_thenReturnUpdatedwidget() {
@@ -95,11 +99,11 @@ public class WidgetDSServiceTest {
         assertEquals(Optional.empty(), service.update(newWidget, 0L));
     }
 
-    // @Test
-    // void whenDeleteWidgetWithValidId_thenWidgetIsRemoved() {
-    //     service.deleteWidgetById(0L);
+    @Test
+    void whenDeleteWidgetWithValidId_thenWidgetIsRemoved() {
+        service.deleteWidgetById(0L);
 
-    //     assertTrue(service.findAllWidgets().isEmpty());
-    // }
+        assertTrue(service.findAllWidgets(1, 1).isEmpty());
+    }
      
 }

@@ -34,10 +34,12 @@ public class WidgetH2ServiceTest {
         assertEquals(Optional.empty(), service.create(null));
     }
 
-    // @Test
-    // void whenSavingValidWidget_thenWidgetIsInH2DB() {
-    //     assertEquals(1, service.findAllWidgets().size());
-    // }
+    @Test
+    void whenSavingValidWidget_thenWidgetIsInH2DB() {
+        service.create( TestUtil.createWidgetWithNoZIndex().get());
+        
+        assertEquals(2, service.findAllWidgets(1, 10).size());
+    }
 
     @Test
     void whenFindingWidgetWithInvalidId_thenReturnOptionalEmpty() {
